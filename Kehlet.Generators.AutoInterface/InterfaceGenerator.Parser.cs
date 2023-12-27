@@ -16,7 +16,7 @@ public partial class InterfaceGenerator
             var isPublic = !(attribute.ConstructorArguments is { IsDefaultOrEmpty: false } args && args[0].Value is 1);
 
             var ns = context.TargetSymbol.ContainingNamespace.ToString();
-            var symbol = context.TargetSymbol.As<INamedTypeSymbol>();
+            var symbol = context.TargetSymbol.Cast<INamedTypeSymbol>();
 
             return new()
             {
@@ -26,7 +26,7 @@ public partial class InterfaceGenerator
                 IsPublic = isPublic,
                 Name = symbol.Name,
                 TypeParameters = GetTypeParameters(symbol.TypeParameters, allowVariance: true),
-                Members = GetPublicMembers(context.SemanticModel, context.TargetNode.As<TypeDeclarationSyntax>()),
+                Members = GetPublicMembers(context.SemanticModel, context.TargetNode.Cast<TypeDeclarationSyntax>()),
                 Docs = symbol.GetDocumentationCommentXml()
             };
         }

@@ -8,10 +8,10 @@ using Microsoft.CodeAnalysis.Text;
 namespace Kehlet.Generators.AutoInterface;
 
 [Generator]
-public class FromStaticMembersGenerator : IIncrementalGenerator
+public class FromInstanceMembersGenerator : IIncrementalGenerator
 {
     private const string Namespace = "Kehlet.Generators";
-    private const string AttributeName = "FromStaticMembers";
+    private const string AttributeName = "FromInstanceMembers";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}";
 
     private const string AttributeSourceCode = $$"""
@@ -59,7 +59,7 @@ public class FromStaticMembersGenerator : IIncrementalGenerator
 
         var members = (from member in targetType.GetMembers()
                        let method = member as IMethodSymbol
-                       where member.IsStatic &&
+                       where member.IsStatic is false &&
                            member.DeclaredAccessibility is Accessibility.Public &&
                            method?.MethodKind is MethodKind.Ordinary
                        let returnType = (voidType, method.ReturnsVoid) switch
@@ -112,13 +112,17 @@ public class FromStaticMembersGenerator : IIncrementalGenerator
                             .Select(import => $"using {import};")
                             .Apply(x => string.Join("\n", x));
 
+        var def = target.Implement
+            ? $"\n{Tab}internal {target.SourceTypeName} Instance {{ get; }}\n"
+            : "";
+        
         var type = $$"""
             #nullable enable
 
             {{imports}}{{ns}}
 
             partial interface {{target.PartialType.Name}}
-            {
+            {{{def}}
                 {{string.Join($"\n\n{Tab}", members)}}
             }
 
@@ -134,7 +138,7 @@ public class FromStaticMembersGenerator : IIncrementalGenerator
                 return ";";
             }
 
-            var methodCall = $"{target.SourceTypeName}.{method.Name}({args});";
+            var methodCall = $"Instance.{method.Name}({args});";
             if (method.HasCustomVoidType)
             {
                 return $$"""

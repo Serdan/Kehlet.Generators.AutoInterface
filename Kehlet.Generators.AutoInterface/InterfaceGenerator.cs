@@ -1,8 +1,6 @@
 ﻿using System.Text;
 using Kehlet.Generators.AutoInterface.Extensions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Kehlet.Generators.AutoInterface;
@@ -33,9 +31,9 @@ public partial class InterfaceGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(provider, Execute);
     }
-    
+
     private static bool Filter(SyntaxNode node, CancellationToken _) =>
-        node.As<TypeDeclarationSyntax>().Modifiers.Any(token => token.IsKind(SyntaxKind.PartialKeyword));
+        node.IsPartial();
 
     private static DefaultImplementationClass Transform(GeneratorAttributeSyntaxContext context, CancellationToken token)
     {
