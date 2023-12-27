@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kehlet.Generators.AutoInterface", "Kehlet.Generators.AutoInterface\Kehlet.Generators.AutoInterface.csproj", "{878CE05D-CD48-4568-805E-B870DA408684}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kehlet.Generators.AutoInterface.Sample", "Kehlet.Generators.AutoInterface.Sample\Kehlet.Generators.AutoInterface.Sample.csproj", "{3D331F3B-5161-4777-8DC4-1D1F5FF9B120}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{878CE05D-CD48-4568-805E-B870DA408684}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{878CE05D-CD48-4568-805E-B870DA408684}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{878CE05D-CD48-4568-805E-B870DA408684}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D331F3B-5161-4777-8DC4-1D1F5FF9B120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D331F3B-5161-4777-8DC4-1D1F5FF9B120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D331F3B-5161-4777-8DC4-1D1F5FF9B120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D331F3B-5161-4777-8DC4-1D1F5FF9B120}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

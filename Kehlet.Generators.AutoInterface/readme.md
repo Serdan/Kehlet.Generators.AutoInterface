@@ -3,34 +3,36 @@
 Source:
 
 ```csharp
-public static class SourceType
+public static class FromStaticMembersSample
 {
-    public static int GetThing(params string[] input) =>
-        input.Length;
-
-    public static void DoThing(int a, int b)
+    public static void DoSomething(int number)
     {
     }
+
+    public static int GetNumber(string str) => str.Length;
 }
 
-[FromStaticMembers(typeof(SourceType), implement: true, voidType: typeof(Unit))]
-public partial interface ISourceType;
+[FromStaticMembers(typeof(FromStaticMembersSample), implement: true, voidType: typeof(Unit))]
+public partial interface IInstance;
+
+public readonly record struct Unit;
 ```
 
 Generated:
 
 ```csharp
-partial interface ISourceType
+partial interface IInstance
 {
-    int GetThing(params string[] input) =>
-        SourceType.GetThing(input);
-
-    Unit DoThing(int a, int b)
+    Unit DoSomething(int number)
     {
-        SourceType.DoThing(a, b);
+        FromStaticMembersSample.DoSomething(number);
         return default;
     }
+
+    int GetNumber(string str) =>
+        FromStaticMembersSample.GetNumber(str);
 }
+
 ```
 
 ## Interface from default implementation
@@ -39,21 +41,29 @@ Source:
 
 ```csharp
 [DefaultImplementation]
-public partial class SourceType
+public partial class DefaultImplementationSample
 {
-    public int GetNumber => 42;
-    public string GetString(double number = Math.PI) => "";
+    public void DoSomething(params string[] values)
+    {
+    }
+
+    public int GetNumber() => 42;
+
+    public string Value => "";
 }
+
 ```
 
 Generated:
 
 ```csharp
-public partial class SourceType : ISourceType;
+public partial class DefaultImplementationSample : IDefaultImplementationSample;
 
-public partial interface ISourceType
+public partial interface IDefaultImplementationSample
 {
-    int GetNumber { get; }
-    string GetString(double number = Math.PI);
+    void DoSomething(params string[] values);
+    int GetNumber();
+    string Value { get; }
 }
+
 ```
