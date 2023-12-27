@@ -32,7 +32,6 @@ partial interface IInstance
     int GetNumber(string str) =>
         FromStaticMembersSample.GetNumber(str);
 }
-
 ```
 
 ## Interface from default implementation
@@ -51,7 +50,6 @@ public partial class DefaultImplementationSample
 
     public string Value => "";
 }
-
 ```
 
 Generated:
@@ -65,5 +63,4 @@ public partial interface IDefaultImplementationSample
     int GetNumber();
     string Value { get; }
 }
-
 ```
