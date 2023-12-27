@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Anders Kehlet</Authors>
+        <Copyright>2023 Anders Kehlet</Copyright>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Serdan/Kehlet.Generators.AutoInterface</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Serdan/Kehlet.Generators.AutoInterface</RepositoryUrl>
+        <Version>1.0.2</Version>
+        <PackageReadmeFile>readme.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.8.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="SortableGenerator.Parser.cs">
+            <DependentUpon>SortableGenerator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="SortableGenerator.Emitter.cs">
+            <DependentUpon>SortableGenerator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="InterfaceGenerator.Emitter.cs">
+            <DependentUpon>InterfaceGenerator.cs</DependentUpon>
+        </Compile>
+        <Compile Update="InterfaceGenerator.Parser.cs">
+            <DependentUpon>InterfaceGenerator.cs</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+</Project>
