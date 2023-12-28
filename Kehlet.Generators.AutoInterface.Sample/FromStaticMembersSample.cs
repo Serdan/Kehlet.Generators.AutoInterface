@@ -7,6 +7,10 @@ public static class FromStaticMembersSample
     }
 
     public static int GetNumber(string str) => str.Length;
+
+    public static Task DoSomethingAsync() => Task.CompletedTask;
+    
+    public static ValueTask DoSomethingAsync2() => ValueTask.CompletedTask;
 }
 
 [FromStaticMembers(typeof(FromStaticMembersSample), implement: true, voidType: typeof(Unit))]

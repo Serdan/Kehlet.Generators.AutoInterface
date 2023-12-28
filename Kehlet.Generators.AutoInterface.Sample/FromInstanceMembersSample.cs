@@ -7,15 +7,9 @@ public class FromInstanceMembersSource
     }
 
     public int GetSomething(string str) => str.Length;
-}
 
-public class FromInstanceMembersSource2
-{
-    public void DoSomething2()
-    {
-    }
-
-    public int GetNumber2(string str) => str.Length;
+    public Task<int> GetNumberAsync() => Task.FromResult(42);
+    public Task DoSomethingAsync() => Task.FromResult(42);
 }
 
 [FromInstanceMembers(typeof(FromInstanceMembersSource), true, typeof(Unit))]
