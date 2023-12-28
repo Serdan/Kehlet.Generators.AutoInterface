@@ -19,7 +19,6 @@ public class FromInstanceMembersSource2
 }
 
 [FromInstanceMembers(typeof(FromInstanceMembersSource), true, typeof(Unit))]
-[FromInstanceMembers(typeof(FromInstanceMembersSource2), true, typeof(Unit))]
 public partial interface IFromInstanceMembers;
 
 public readonly struct FromInstanceMembersStruct(FromInstanceMembersSource source) : IFromInstanceMembers
