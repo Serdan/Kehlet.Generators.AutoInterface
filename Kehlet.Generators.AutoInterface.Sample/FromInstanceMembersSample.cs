@@ -6,10 +6,20 @@ public class FromInstanceMembersSource
     {
     }
 
-    public int GetNumber(string str) => str.Length;
+    public int GetSomething(string str) => str.Length;
+}
+
+public class FromInstanceMembersSource2
+{
+    public void DoSomething2()
+    {
+    }
+
+    public int GetNumber2(string str) => str.Length;
 }
 
 [FromInstanceMembers(typeof(FromInstanceMembersSource), true, typeof(Unit))]
+[FromInstanceMembers(typeof(FromInstanceMembersSource2), true, typeof(Unit))]
 public partial interface IFromInstanceMembers;
 
 public readonly struct FromInstanceMembersStruct(FromInstanceMembersSource source) : IFromInstanceMembers

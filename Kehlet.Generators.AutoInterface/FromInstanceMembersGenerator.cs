@@ -11,7 +11,7 @@ namespace Kehlet.Generators.AutoInterface;
 public class FromInstanceMembersGenerator : IIncrementalGenerator
 {
     private const string Namespace = "Kehlet.Generators";
-    private const string AttributeName = "FromInstanceMembers";
+    private const string AttributeName = "FromInstanceMembersAttribute";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}";
 
     private const string AttributeSourceCode = $$"""
