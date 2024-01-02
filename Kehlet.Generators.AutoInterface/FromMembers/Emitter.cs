@@ -8,18 +8,24 @@ public static class Emitter
     {
         var parameters = string.Join(", ", method.Parameters);
         var arguments = string.Join(", ", method.Arguments);
-        var body = EmitBody(method, implement, arguments, source);
+        var body = EmitMethodBody(method, implement, arguments, source);
         var async = body.async ? "async " : "";
         return $"{async}{method.ReturnType} {method.Name}({parameters}){body.body}";
     }
 
-    private static (string body, bool async) EmitBody(Method method, bool implement, string args, string source)
+    public static string EmitProperty(Property property, bool implement, string source)
+    {
+        var body = EmitPropertyBody(property, implement, source);
+        return $"{property.Type} {property.Name}{body}";
+    }
+
+    private static (string body, bool async) EmitMethodBody(Method method, bool implement, string args, string source)
     {
         if (implement is false)
         {
             return (";", false);
         }
-        
+
         var methodCall = $"{source}.{method.Name}({args});";
         switch (method.ReturnTypeHandling)
         {
@@ -50,5 +56,29 @@ public static class Emitter
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    private static string EmitPropertyBody(Property property, bool implement, string source)
+    {
+        var getGetterBody = () => implement ? $" => {source}.{property.Name};" : ";";
+        var getSetterBody = () => implement ? $" => {source}.{property.Name} = value;" : ";";
+        var getGetter = () => $"get{getGetterBody()}";
+        var getSetter = () => $"set{getSetterBody()}";
+
+        return (property.HasGetter, property.HasSetter) switch
+        {
+            (true, false) =>
+                implement ? getGetterBody() : " { " + getGetter() + " }",
+            (false, true) =>
+                " { " + getSetter() + " }",
+            (true, true) => $$"""
+                
+                    {
+                        {{getGetter()}}
+                        {{getSetter()}}
+                    }
+                """,
+            (false, false) => ""
+        };
     }
 }

@@ -16,7 +16,7 @@ public class FromStaticMembersGenerator : IIncrementalGenerator
 
     private const string AttributeSourceCode = $$"""
         #nullable enable
-        
+
         using System;
 
         namespace {{Namespace}};
@@ -57,8 +57,15 @@ public class FromStaticMembersGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, AutoInterfaceDetails target)
     {
-        var members = from method in target.Methods
-                      select Emitter.EmitMethod(method, target.Implement, target.SourceTypeName); 
+        var methods = (
+            from method in target.Methods
+            select Emitter.EmitMethod(method, target.Implement, target.SourceTypeName)
+        ).Apply(ms => string.Join($"\n\n{Tab}", ms));
+
+        var properties = (
+            from property in target.Properties
+            select Emitter.EmitProperty(property, target.Implement, target.SourceTypeName)
+        ).Apply(ps => string.Join($"\n\n{Tab}", ps));
 
         var ns = target.PartialType.Namespace is null
             ? ""
@@ -75,12 +82,14 @@ public class FromStaticMembersGenerator : IIncrementalGenerator
 
             partial interface {{target.PartialType.Name}}
             {
-                {{string.Join($"\n\n{Tab}", members)}}
+                {{properties}}
+                
+                {{methods}}
             }
 
             """;
 
-        context.AddSource($"{target.PartialType.Name}.AutoInterface.g.cs", SourceText.From(type, Encoding.UTF8));
+        context.AddSource($"{target.PartialType.Name}.g.cs", SourceText.From(type, Encoding.UTF8));
     }
 
     private const string Tab = "    ";

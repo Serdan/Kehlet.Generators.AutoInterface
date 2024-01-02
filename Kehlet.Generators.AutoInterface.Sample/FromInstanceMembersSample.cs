@@ -2,6 +2,22 @@
 
 public class FromInstanceMembersSource
 {
+    public int Number1
+    {
+        get => 1;
+    }
+
+    public int Number2
+    {
+        set => DoSomething();
+    }
+
+    public int Number3
+    {
+        get => 1;
+        set => DoSomething();
+    }
+
     public void DoSomething()
     {
     }

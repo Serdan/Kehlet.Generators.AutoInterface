@@ -12,7 +12,7 @@ public class Parser(string FullAttributeName)
     private static INamedTypeSymbol? TaskType1;
     private static INamedTypeSymbol? ValueTaskType1;
 
-    public AutoInterfaceDetails Parse(GeneratorAttributeSyntaxContext context, Func<IMethodSymbol, bool> predicate)
+    public AutoInterfaceDetails Parse(GeneratorAttributeSyntaxContext context, Func<ISymbol, bool> predicate)
     {
         TaskType ??= context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(Task).FullName!)!;
         ValueTaskType ??= context.SemanticModel.Compilation.GetTypeByMetadataName(typeof(ValueTask).FullName!)!;
@@ -24,44 +24,67 @@ public class Parser(string FullAttributeName)
         var implement = attribute.ConstructorArguments[1].Value.Cast<bool>();
         var voidType = attribute.ConstructorArguments[2].Value.As<ITypeSymbol>();
 
-        var members = (from member in targetType.GetMembers()
-                       let method = member as IMethodSymbol
-                       where method is { DeclaredAccessibility: Accessibility.Public, MethodKind: MethodKind.Ordinary }
-                           && predicate(method)
-                       let returnType = (voidType, method.ReturnsVoid, method.ReturnType) switch
-                       {
-                           ({ } type, true, _) => (type, ReturnTypeEnum.Custom),
-                           ({ } type, false, { } returnType) when IsTask(returnType) => (TaskType1.Construct(type), ReturnTypeEnum.CustomTask),
-                           ({ } type, false, { } returnType) when IsValueTask(returnType) => (ValueTaskType1.Construct(type), ReturnTypeEnum.CustomTask),
-                           _ => (method.ReturnType, ReturnTypeEnum.Normal)
-                       }
-                       let parameters = method.Parameters.Select(parameter => parameter.ToUnqualifiedName()).ToImmutableArray()
-                       let args = method.Parameters.Select(x => x.Name).ToImmutableArray()
-                       let import = (string?[])
-                       [
-                           returnType.Item1.GetNamespace(),
-                           ..method.Parameters.Select(p => p.Type.GetNamespace())
-                       ]
-                       select new
-                       {
-                           Namespaces = import,
-                           Method = new Method(method.Name, returnType.Item1.ToUnqualifiedName(), ReturnTypeHandling: returnType.Item2, parameters, args)
-                       }).ToArray();
+        var methodArray =
+            (from member in targetType.GetMembers()
+             let method = member as IMethodSymbol
+             where method is { DeclaredAccessibility: Accessibility.Public, MethodKind: MethodKind.Ordinary }
+                 && predicate(method)
+             let returnType = (voidType is not null, method.ReturnsVoid, method.ReturnType) switch
+             {
+                 (true, true, _) => (voidType!, ReturnTypeEnum.Custom),
+                 (true, false, { } returnType) when IsTask(returnType) => (TaskType1.Construct(voidType!), ReturnTypeEnum.CustomTask),
+                 (true, false, { } returnType) when IsValueTask(returnType) => (ValueTaskType1.Construct(voidType!), ReturnTypeEnum.CustomTask),
+                 var (_, _, returnType) => (returnType, ReturnTypeEnum.Normal)
+             }
+             let parameters = method.Parameters.Select(parameter => parameter.ToUnqualifiedName()).ToImmutableArray()
+             let args = method.Parameters.Select(x => x.Name).ToImmutableArray()
+             let import = (string?[])
+             [
+                 returnType.Item1.GetNamespace(),
+                 ..method.Parameters.Select(p => p.Type.GetNamespace())
+             ]
+             select new
+             {
+                 Namespaces = import,
+                 Method = new Method(method.Name, returnType.Item1.ToUnqualifiedName(), ReturnTypeHandling: returnType.Item2, parameters, args)
+             }).ToArray();
 
-        var methods = members.Select(x => x.Method)
-                             .ToImmutableArray();
+        var propertyArray =
+            (from member in targetType.GetMembers()
+             let property = member as IPropertySymbol
+             where property is { DeclaredAccessibility: Accessibility.Public } && predicate(property)
+             let type = (voidType is not null, property.Type) switch
+             {
+                 (true, { } type) when IsTask(type) => (TaskType1.Construct(voidType!), ReturnTypeEnum.CustomTask),
+                 (true, { } type) when IsValueTask(type) => (ValueTaskType1.Construct(voidType!), ReturnTypeEnum.CustomTask),
+                 var (_, type) => (type, ReturnTypeEnum.Normal)
+             }
+             let import = type.type.GetNamespace()
+             select new
+             {
+                 Namespace = import,
+                 Property = new Property(property.Name, property.Type.ToUnqualifiedName(), property.GetMethod is not null, property.SetMethod is not null)
+             }).ToArray();
 
-        var imports = members.SelectMany(member => member.Namespaces)
-                             .Union([targetType.GetNamespace(), voidType?.GetNamespace()])
-                             .Where(x => x is not null)
-                             .Distinct()
-                             .Select(x => x!)
-                             .ToImmutableArray();
+
+        var methods = methodArray.Select(x => x.Method)
+                                 .ToImmutableArray();
+
+        var properties = propertyArray.Select(x => x.Property)
+                                      .ToImmutableArray();
+
+        var imports = methodArray.SelectMany(member => member.Namespaces)
+                                 .Union([targetType.GetNamespace(), voidType?.GetNamespace()])
+                                 .Union(propertyArray.Select(x => x.Namespace))
+                                 .Where(x => x is not null)
+                                 .Distinct()
+                                 .Select(x => x!)
+                                 .ToImmutableArray();
 
         var symbol = context.TargetSymbol.Cast<INamedTypeSymbol>();
         var partialType = new PartialType(symbol.Name, symbol.GetNamespace());
 
-        return new(partialType, targetType.ToUnqualifiedName(), implement, methods, imports);
+        return new(partialType, targetType.ToUnqualifiedName(), implement, methods, properties, imports);
     }
 
     private static bool IsTask(ISymbol other) =>
@@ -69,5 +92,4 @@ public class Parser(string FullAttributeName)
 
     private static bool IsValueTask(ISymbol other) =>
         SymbolEqualityComparer.Default.Equals(ValueTaskType, other);
-
 }

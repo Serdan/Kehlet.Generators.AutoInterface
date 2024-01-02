@@ -2,6 +2,22 @@
 
 public static class FromStaticMembersSample
 {
+    public static int Number1
+    {
+        get => 1;
+    }
+
+    public static int Number2
+    {
+        set => DoSomething(value);
+    }
+
+    public static int Number3
+    {
+        get => 1;
+        set => DoSomething(value);
+    }
+
     public static void DoSomething(int number)
     {
     }
@@ -9,7 +25,7 @@ public static class FromStaticMembersSample
     public static int GetNumber(string str) => str.Length;
 
     public static Task DoSomethingAsync() => Task.CompletedTask;
-    
+
     public static ValueTask DoSomethingAsync2() => ValueTask.CompletedTask;
 }
 

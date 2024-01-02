@@ -57,8 +57,15 @@ public class FromInstanceMembersGenerator : IIncrementalGenerator
 
     private static void Execute(SourceProductionContext context, AutoInterfaceDetails target)
     {
-        var members = from method in target.Methods
-                      select Emitter.EmitMethod(method, target.Implement, "Instance");
+        var members = (
+            from method in target.Methods
+            select Emitter.EmitMethod(method, target.Implement, "Instance")
+        ).Apply(ms => string.Join($"\n\n{Tab}", ms));
+
+        var properties = (
+            from property in target.Properties
+            select Emitter.EmitProperty(property, target.Implement, "Instance")
+        ).Apply(ps => string.Join($"\n\n{Tab}", ps));
 
         var ns = target.PartialType.Namespace is null
             ? ""
@@ -79,12 +86,14 @@ public class FromInstanceMembersGenerator : IIncrementalGenerator
 
             partial interface {{target.PartialType.Name}}
             {{{def}}
-                {{string.Join($"\n\n{Tab}", members)}}
+                {{properties}}
+                
+                {{members}}
             }
 
             """;
 
-        context.AddSource($"{target.PartialType.Name}.AutoInterface.g.cs", SourceText.From(type, Encoding.UTF8));
+        context.AddSource($"{target.PartialType.Name}.g.cs", SourceText.From(type, Encoding.UTF8));
     }
 
     private const string Tab = "    ";
