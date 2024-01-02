@@ -28,7 +28,7 @@ public class Parser(string FullAttributeName)
             (from member in targetType.GetMembers()
              let method = member as IMethodSymbol
              where method is { DeclaredAccessibility: Accessibility.Public, MethodKind: MethodKind.Ordinary }
-                 && predicate(method)
+                 && predicate(method) && !IsObsolete(method)
              let returnType = (voidType is not null, method.ReturnsVoid, method.ReturnType) switch
              {
                  (true, true, _) => (voidType!, ReturnTypeEnum.Custom),
@@ -52,7 +52,8 @@ public class Parser(string FullAttributeName)
         var propertyArray =
             (from member in targetType.GetMembers()
              let property = member as IPropertySymbol
-             where property is { DeclaredAccessibility: Accessibility.Public } && predicate(property)
+             where property is { DeclaredAccessibility: Accessibility.Public }
+                 && predicate(property) && !IsObsolete(property)
              let type = (voidType is not null, property.Type) switch
              {
                  (true, { } type) when IsTask(type) => (TaskType1.Construct(voidType!), ReturnTypeEnum.CustomTask),
@@ -86,6 +87,9 @@ public class Parser(string FullAttributeName)
 
         return new(partialType, targetType.ToUnqualifiedName(), implement, methods, properties, imports);
     }
+
+    private static bool IsObsolete(ISymbol symbol) =>
+        symbol.GetAttributes(typeof(ObsoleteAttribute).FullName!).Length > 0;
 
     private static bool IsTask(ISymbol other) =>
         SymbolEqualityComparer.Default.Equals(TaskType, other);

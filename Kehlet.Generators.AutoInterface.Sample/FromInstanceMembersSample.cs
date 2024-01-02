@@ -26,6 +26,12 @@ public class FromInstanceMembersSource
 
     public Task<int> GetNumberAsync() => Task.FromResult(42);
     public Task DoSomethingAsync() => Task.FromResult(42);
+
+    [Obsolete]
+    public int ObsTest() => 1;
+
+    [Obsolete]
+    public int ObsTest2 => 1;
 }
 
 [FromInstanceMembers(typeof(FromInstanceMembersSource), true, typeof(Unit))]
